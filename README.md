@@ -1,180 +1,129 @@
-# Ebsynth: A Fast Example-based Image Synthesizer
+# Final Project
 
-`ebsynth` is a versatile tool for by-example synthesis of images.
-It can be used for a variety of image synthesis tasks, including guided
-texture synthesis, artistic style transfer, content-aware inpainting
-and super-resolution.
+Parker Addison, pgaddiso@ucsd.edu
 
-The focus of `ebsynth` is on preserving the fidelity of the source material.
-Unlike other recent approaches, `ebsynth` doesn't rely on neural networks.
-Instead, it uses a state-of-the-art implementation of non-parametric
-texture synthesis algorithms. Thanks to its patch-based nature, `ebsynth`
-produces crisp results, which preserve all the fine detail present in the
-original image.
+## Abstract Proposal
 
-## Basic usage
+This project is a continuation of my work on [*face2fake*](https://github.com/ucsd-ml-arts/generative-visual-parker-visual).  The process and output have changed, but the background and motivation have remained the same.
 
-```
-ebsynth -style <style.png> -guide <source.png> <target.png> -output <output.png>
-```
+In this project, real faces are transformed into uncanny, generated-looking faces.  Multiple methods of achieving this were attempted, including:
+- Training CycleGAN [[6]] on high quality 1024x1024 images of real faces from the FFHQ repository [[7]] and 1024x1024 images of fake faces generated from ThisPersonDoesNotExist [[2]].
+- Running Neural Style Transfer [[8]] using a single real face as the Content Image, and multiple fakes faces from [[2]] as the Style Images.
+- Using StyleGAN-Encoder [[9]] to iterate towards a StyleGAN latent vector which generates output that minimizes perceptual loss with a single real face.
 
-## Options
-```
--style <style.png>
--guide <source.png> <target.png>
--weight <value>
--uniformity <value>
--patchsize <value>
--pyramidlevels <number>
--searchvoteiters <number>
--patchmatchiters <number>
--extrapass3x3
--backend [cpu|cuda]
-```
+The StyleGAN-Encoder approach produced the best results, and this project demonstrates "GAN-ification" on the eight subjects used in the *face2fake* project: Barack Obama, Bill Clinton, Ivanka Trump, Nicolas Cage, Serena Williams, Jackie Chan, Parker Addison, and Robert Twomey.  
 
-## Download
+In addition to images of each individual subject as they are independently reconstructed using the encoder, this project also showcases a video in which the encoder attempted to find a latent representation of a given subject on the condition that the optimization seach had to start at the latent representation of the previously-reconstructed subject.
 
-Pre-built Windows binary can be downloaded from here: [http://jamriska.cz/ebsynth/ebsynth-win64.zip](http://jamriska.cz/ebsynth/ebsynth-win64.zip).
+*Below is the original abstract from the *face2fake* project:*
 
-# Examples
+> Within recent years, GAN technology has allowed people to generate convincing, yet fake humans faces with incredible speed. Advancements such as StyleGAN [[1]] have greatly bolstered the believability of these generated faces, prompting fake-face entertainment [[2]], fake-face business uses [[3]], and fake-face legal misuses [[4]]. However, with most of these models, the generated images are still not yet on par with what our brains (which have, presumably, seen human faces all our lives) have come to expect. Instead, the result is commonly referred to as uncanny. Looking at the generated image, the mind can tell that something just isn't right. Upon closer inspection, it may be that the teeth or melded together, or the eyes are slightly different shapes, or the skin has strange presence and/or absence of folds and stretch marks. At the end of the day, despite all of the wrongness that the brain sees in the image, there is still slight comfort to be found in the realization that these people don't actually exist.
+>
+> But what if they did? How would it feel to see yourself as the output of a GAN?
+>
+> The goal of this art piece is to deliver on those questions—to create a model which can take an image of a real face and embed within it the uncanniness of a fake generated face.
 
-## Texture-by-numbers
 
-The first example shows how to perform a basic guided texture synthesis with `ebsynth`.
-This use-case was first proposed in the original Image Analogies paper [1], where they
-called it 'texture-by-numbers'. We start with a photograph of a natural scene together
-with its segmentation (e.g., rock is painted green, sky with blue):
+## Project Report
 
-<p align='center'>
-  <img src='doc/images/texbynum.jpg'/>
-</p>
+See `ECE188 Final.pdf`
 
-```
-ebsynth -style source_photo.png -guide source_segment.png target_segment.png -output output.png
-```
+## Model/Data
 
-Next, we paint a target segmentation by hand, and we ask `ebsynth` to produce
-a new 'photograph' that would match it. In the language of style transfer: we want
-to transfer the *style* of the source photograph onto the target segmentation in
-a way that would respect the individual segments. The segmentation acts as a *guide*
-for the synthesis.
+This project relies on multiple pre-trained models included in the StyleGAN [[1]] and StyleGAN-Encoder [[9]] repositories, respectively.  These pre-trained models are:
+- StyleGAN from the official paper, *"A Style-Based Generator Architecture for Generative Adversarial Networks"*, trained on the FFHQ [[7]] data set
+- VGG-16 from the official paper, *"Very Deep Convolutional Networks for Large-Scale Visual Recognition"*
+- VGG-16 Zhang Perceptual derived by Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, and Oliver Wang.
 
-## StyLit: Illumination-Guided Stylization of 3D Renderings
-<p align='center'>
-  <img src='doc/images/stylit-teaser.jpg'/>
-</p>
+The StyleGAN-Encoder approach needed no further data to train its latent reconstructions.
 
-This example shows how to achieve a non-photorealistic rendering with `ebsynth`.
-It is based on the work of Fišer et al. [7]. The goal is to render a 3D model like
-an artist would do. Specifically, we want to capture the way how an artist conveys
-the different illumination effects, like highlights, contact shadows, and indirect
-bounces. To that end, we set up a simple reference scene with an illuminated ball,
-and let the artist draw it in her/his style. We use an off-the-shelf path tracer
-to produce the separate render passes, e.g., full global illumination, just the
-direct diffuse component, just the indirect bounce, etc. Next, we render the same
-set of passes for the target 3D model and use them as guides for `ebsynth`.
+## Code
 
-<p align='center'>
-  <img src='doc/images/stylit.jpg'/>
-</p>
+Simple usage of the StyleGAN-Encoder is as follows:
 
-```
-ebsynth -style source_style.png
-        -guide source_fullgi.png target_fullgi.png -weight 0.66
-        -guide source_dirdif.png target_dirdif.png -weight 0.66
-        -guide source_indirb.png target_indirb.png -weight 0.66
-        -output output.png
+```bash
+$ # Clone the StyleGAN-Encoder repository
+$ git clone https://github.com/Puzer/stylegan-encoder
+$
+$ cd stylegan-encoder
+$
+$ # Add your desired real faces (they don't need to be cropped)
+$ mkdir images/raw_images images/aligned_images images/generated_images images/latent_representations
+$
+$ cp ../people/* images/raw_images/
+$ 
+$ # Align the images
+$ python align_images.py images/raw_images images/aligned_images
+$ 
+$ # Produce your reconstructions with your desired number of iterations
+$ python encode_images.py images/aligned_images images/generated_images images/latent_representations --iterations <iter-count>
 ```
 
-Compared to texture-by-numbers, the main difference here is we now have *multiple*
-guiding channels.  Note the guides always come in pairs: source guide first, target
-guide second. For better results, we might want to boost the contribution of guides
-relative to the style. In the example above, the style has a default weight of 1.0,
-while the guide channels have weight of 0.66 each. In sum, the total guide weight
-is 2.0, resulting in 2:1 guide-to-style ratio.
+I had to slightly modify `encode_images.py` and `encoder/perceptual_model.py` in order to:
+- optionally generate an image after every 10 epochs, instead of only at the end of all epochs
+- optionally begin the optimization search at a given latent representation as opposed to the null vector
 
-## FaceStyle: Example-based Stylization of Face Portraits
+These modified scripts have been included.  I had the intention of adding the following arguments when calling `python encode_images.py`:
+- `--generate-every <int>` (default `None`) Generates the reconstructed image after every N epochs in addition to at the end of all epochs.
+- `--dependent-start` If present, does not reset the latent-vector between target reconstructions.
+- `--start-at <path-to-.npy>` The path to the latent representation to start the first target reconstruction at.
 
-<p align='center'>
-  <img src='doc/images/facestyle-teaser.jpg'/>
-</p>
+However, I had issues with some of these arguments, so currently none of the arguments exist—instead they are just hardcoded into the scripts!  Since I would like to come back to this project later, I may end up polishing these up.
 
-This example demonstrates how one can use `ebsynth` to transfer the style of
-a portrait painting onto another person's photograph. It is based on the work
-of Fišer et al. [8]. The goal is to reproduce the fine nuances of the source
-painting, while preserving the identity of the target person. I.e., we want
-the person to still be recognizable after the synthesis.
+Also provided is a script `video.sh` which converts the above generated frames into an mp4 clip.
 
-Unlike with StyLit, in this setting we don't have the reference 3D geometry
-to use as a guide. However, we can exploit the fact that both the source painting
-and the target photo contain a human face, which has a well-defined structure.
-We will use this structure to infer the necessary guiding information.
+## Results
 
-<p align='center'>
-  <img src='doc/images/facestyle.jpg'/>
-</p>
+See [`index.html`]()
 
-```
-ebsynth -style source_painting.png
-        -guide source_Gapp.png target_Gapp.png -weight 2.0
-        -guide source_Gseg.png target_Gseg.png -weight 1.5 
-        -guide source_Gpos.png target_Gpos.png -weight 1.5 
-        -output output.png
-```
+See `images/generated_images/*ep/<person-name>.mp4` for StyleGAN reconstruction of a subject, starting from the null latent vector.
 
-Specifically, we detect the facial landmarks in both the target and source images,
-and use them to produce a soft segmentation guide `Gseg`, and a positional guide
-`Gpos`, which is essentially a dense warp field that maps every target pixel to its
-corresponding position in source. To preserve the person's identity, we use the
-appearance guide `Gapp`, which is a grayscale version of the target photo that was
-equalized to match the luminance of the source painting.
+See `images/generated_images/loop/loop.mp4` for a loop-able clip of StyleGAN reconstruction of a subject, starting from the learned latent vector of the previous subject.  Note that these reconstructions struggled to achieve the same loss minimization as the reconstructions which started at the null latent vector, however the same number of reconstruction iterations is used.
 
---------------------------------------------------------------------------
+See `images/generated_images/loop/<person-name>.mp4` to see the individual subject reconstructions from the loopable clip.
 
-## License
+All of the above mentioned video clips have a frame for every 10 iterations of the StyleGAN-Encoder [[8]], up to 1440 iterations per subject.
 
-The code is released into the public domain. You can do anything you want with it.
+## Technical Notes
 
-However, you should be aware that the code implements the PatchMatch algorithm, which is patented by Adobe (U.S. Patent 8,861,869). Other techniques might be patented as well. It is your responsibility to make sure you're not infringing any patent holders' rights by using this code. 
+See `conda_requirements.txt` for Python packages that are required.
 
-## Citation
+Note that the command-line tool `ffmpeg` is required to convert the images to videos.
 
-If you find this code useful for your research, please cite:
+## Reference
 
-```
-@misc{Jamriska2018,
-  author = {Jamriska, Ondrej},
-  title = {Ebsynth: Fast Example-based Image Synthesis and Style Transfer},
-  year = {2018},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/jamriska/ebsynth}},
-}
-```
+1. Tero Karras, Samuli Laine, Timo Aila, and Nvidia. *A Style-Based Generator Architecture for Generative Adversarial Networks*. December 2018. https://github.com/NVlabs/stylegan
 
-## References
+[1]: https://github.com/NVlabs/stylegan
 
-1. Image Analogies  
-   Aaron Hertzmann, Chuck Jacobs, Nuria Oliver, Brian Curless, David H. Salesin  
-   In SIGGRAPH 2001 Conference Proceedings, 327–340.  
-2. Texture optimization for example-based synthesis  
-   Vivek Kwatra, Irfan A. Essa, Aaron F. Bobick, Nipun Kwatra  
-   ACM Transactions on Graphics 24, 3 (2005), 795–802.  
-3. Space-Time Completion of Video  
-   Yonatan Wexler, Eli Shechtman, Michal Irani  
-   IEEE Transactions on Pattern Analysis and Machine Intelligence 29, 3 (2007), 463–476.  
-4. PatchMatch: A randomized correspondence algorithm for structural image editing  
-   Connelly Barnes, Eli Shechtman, Adam Finkelstein, Dan B. Goldman  
-   ACM Transactions on Graphics 28, 3 (2009), 24.  
-5. Self Tuning Texture Optimization  
-   Alexandre Kaspar, Boris Neubert, Dani Lischinski, Mark Pauly, Johannes Kopf  
-   Computer Graphics Forum 34, 2 (2015), 349–360.  
-6. LazyFluids: Appearance Transfer for Fluid Animations  
-   Ondřej Jamriška, Jakub Fišer, Paul Asente, Jingwan Lu, Eli Shechtman, Daniel Sýkora  
-   ACM Transactions on Graphics 34, 4 (2015), 92.  
-7. StyLit: Illumination-Guided Example-Based Stylization of 3D Renderings  
-   Jakub Fišer, Ondřej Jamriška, Michal Lukáč, Eli Shechtman, Paul Asente, Jingwan Lu, Daniel Sýkora  
-   ACM Transactions on Graphics 35, 4 (2016), 92.  
-8. Example-Based Synthesis of Stylized Facial Animations  
-   Jakub Fišer, Ondřej Jamriška, David Simons, Eli Shechtman, Jingwan Lu, Paul Asente, Michal Lukáč, Daniel Sýkora  
-   ACM Transactions on Graphics 36, 4 (2017), 155.  
+2. Phillip Wang. *This Person Does Not Exist*. February 2019. https://thispersondoesnotexist.com
+
+[2]: https://thispersondoesnotexist.com
+
+3. Ivan Braun et al. and Generated Media Inc. *100K Faces project*. https://generated.photos
+
+[3]: https://generated.photos
+
+4. AP News. *"Experts: Spy used AI-generated face to connect with targets"*. June 2019. https://apnews.com/bc2f19097a4c4fffaa00de6770b8a60d
+
+[4]: https://apnews.com/bc2f19097a4c4fffaa00de6770b8a60d
+
+5. Gary B. Huang, Manu Ramesh, Tamara Berg, Erik Learned-Miller. *Labeled Faces in the Wild: A Database for Studying Face Recognition in Unconstrained Environments*. University of Massachusetts. October 2007. http://vis-www.cs.umass.edu/lfw/
+
+[5]: http://vis-www.cs.umass.edu/lfw/
+
+6. Jun-Yan Zhu*, Taesung Park*, Phillip Isola, Alexei A. Efros. *Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks*. November 2017. https://junyanz.github.io/CycleGAN/
+
+[6]: https://junyanz.github.io/CycleGAN/
+
+7. Tero Karras, Samuli Laine, Timo Aila, and Nvidia. Flickr Faces High Quality dataset.  February 2019. https://github.com/NVlabs/ffhq-dataset
+
+[7]: https://github.com/NVlabs/ffhq-dataset
+
+8. Cameron Smith. *Neural Style Transfer*. November 2016. https://github.com/cysmith/neural-style-tf
+
+[8]: https://github.com/cysmith/neural-style-tf
+
+9. Dmitry Nikitko. StyleGAN-Encoder. February 2019. https://github.com/Puzer/stylegan-encoder
+
+[9]: https://github.com/Puzer/stylegan-encoder

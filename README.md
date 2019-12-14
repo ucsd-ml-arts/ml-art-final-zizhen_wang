@@ -16,10 +16,18 @@ Zizhen, ziw142@ucsd.edu
 
 
 ## Code
+- Jupyter notebooks: style_transfer_keras.ipynb [style_transfer_keras.ipynb](https://github.com/ucsd-ml-arts/generative-visual-zizhen-w/blob/master/style_transfer_keras.ipynb)
+- Jupyter notebooks: dream.ipynb [dream.ipynb](https://github.com/ucsd-ml-arts/ml-art-final-zizhen_wang/blob/master/dream.ipynb)
+Ebsynth download: vswhere.exe and vcvarsall.bat and any set up for system. Or can download on the website: [https://ebsynth.com/]
 
 
 
 ## Results
+Test 3 Deep Dream:
+[https://drive.google.com/file/d/1vAeVPPLNpkl-RMFHOhaj3KR0Ik7b3HzW/view?usp=sharing]
+Test 4 Style transfer:
+[https://drive.google.com/file/d/1UK9WICYDjbUX7H7aq1QlQTxmidVZhj5k/view?usp=sharing]
+
 
 
 ## Technical Notes

@@ -12,7 +12,7 @@ Zizhen, ziw142@ucsd.edu
 
 ## Project Report
 
-- See ECE188_final.pdf [ECE188_final.pdf](https://github.com/ucsd-ml-arts/ml-art-final-zizhen_wang/blob/master/ECE188_final.pdf)
+- See ECE188_final_project.pdf [ECE188_final_project.pdf](https://github.com/ucsd-ml-arts/ml-art-final-zizhen_wang/blob/master/ECE188_final_project.pdf)
 
 ## Model/Data
 - Content: one 11 second video cutting from the film Chungking Express by Wong Kar-wai https://drive.google.com/file/d/1gyJaZ2K49fw2qia3kkyq94DYDlxWLV0v/view?usp=sharing

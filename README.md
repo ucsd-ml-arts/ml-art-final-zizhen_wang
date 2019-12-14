@@ -38,7 +38,10 @@ The style transfer: the color difference is more intense and also character moti
 
 
 ## Technical Notes
-
+- Use iMoive the cut film to a short video
+- Use Preiere to convert a video into an image sequence (Ctrl + M).
+- Ebsynth need the frame and keyframe have exactly the same resolution which should have the same length and width. I used photoshop to change each keyframe to the same resolution.  
+- Use Preiere to combine with the audio and produce the caption.
 
 
 ## Reference
